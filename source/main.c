@@ -25,23 +25,35 @@ int main(int argc, char *argv[]){
 	strcpy(log_filename, "/opt/pixar/NIMBYDaemon.log");
 
 	//Setup for HTTP requests
-	if (get_ipaddress(ip_address)){
-		error_log("Cannot find system IP address!\n");
-		return 1;
+	int err_num = 0;
+	while (1){
+		//Try getting system IP address every 6 sec
+		if (get_ipaddress(ip_address)){
+			if (++err_num % 10 == 0)
+				error_log("Failed to get system IP address for %d minutes\n", err_num/10);
+			sleep(6);
+		}
+		else break;
 	}
 	get_hostname(hostname, 50);
 	curl = open_curl();
 	
-	//Setup XServer for querying idle time
-	int event_base, error_base;
-	if (!(display = XOpenDisplay(NULL))){
-		error_log("XServer does not appear to be running\n");
-		return 2;
+	//Make sure we can query X for idleness before running the daemon
+	err_num = 0;
+	while (1){
+		if (!(display = XOpenDisplay(NULL))){
+			if (++err_num % 10 == 0)
+				error_log("XServer has not been running for %d minutes\n", err_num/10);
+			sleep(6);
+		}
+		else break;
 	}
+	int event_base, error_base;
 	if (!XScreenSaverQueryExtension(display, &event_base, &error_base)){
 		error_log("XScreenSaver extension not present\n");
 		return 3;
 	}
+	XCloseDisplay(display);
 	
 	/// QUERY LOOP
 	int i, sleep_delay = 1, new_sleep_delay, new_nimby_state;
@@ -118,7 +130,7 @@ int main(int argc, char *argv[]){
 		sleep_delay = new_sleep_delay;
 		sys_idle_time += sleep_delay;
 		if (VERBOSE)
-			printf("---- SLEEPING %d ----\n", sleep_delay);
+			error_log("---- SLEEPING %d ----\n", sleep_delay);
 		sleep(sleep_delay);
 	}
 

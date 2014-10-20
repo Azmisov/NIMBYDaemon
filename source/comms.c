@@ -87,6 +87,7 @@ void get_hostname(char* buffer, int size){
 	struct addrinfo hints, *hinfo;
 	buffer[size-1] = '\0';
 	gethostname(buffer, size-1);
+	/* Apparently, tractor doesn't like the resolved hostname address...
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -97,6 +98,7 @@ void get_hostname(char* buffer, int size){
 	if (hinfo != NULL)
 		sprintf(buffer, "%s", hinfo->ai_canonname);
 	freeaddrinfo(hinfo);
+	//*/
 }
 int get_ipaddress(char* buffer){
 	buffer[0] = '\0';

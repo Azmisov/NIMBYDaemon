@@ -4,7 +4,7 @@ void error_log(const char *format, ...){
 	FILE *flog;
 	//If the log file is over 3.5 megabytes, empty it and start again
 	struct stat st;
-	if (!stat(log_filename, &st) && st.st_size >= 3670016) //1048576 per megabyte
+	if (!stat(log_filename, &st) && st.st_size >= 36700160) //1048576 per megabyte
 		flog = fopen(log_filename, "w+");
 	else flog = fopen(log_filename, "a+");
 	//Write to the log file

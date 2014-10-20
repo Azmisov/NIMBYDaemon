@@ -38,9 +38,21 @@ void query_reset_login(){
 
 //Update XServer idleness
 void query_x(int dt){
+	//Open XDisplay and query for idleness
+	int err_num = 0;
+	while (1){
+		if (!(display = XOpenDisplay(NULL))){
+			if (++err_num % 10 == 0)
+				error_log("XServer has not been running for %d minutes\n", err_num/10);
+			sleep(6);
+		}
+		else break;
+	}
 	XScreenSaverInfo info;
 	XScreenSaverQueryInfo(display, DefaultRootWindow(display), &info);
 	float idle_time = (float) info.idle/1000.0f;
+	XCloseDisplay(display);
+
 	//Running average of idleness
 	int idle = idle_time < dt ? -1 : 1, i;
 	float shift = idle*(1-sys_idle_avg_decay);
@@ -54,7 +66,7 @@ void query_x(int dt){
 		sys_idle_time = idle_time;
 	//Debug x query
 	if (VERBOSE)
-		printf("QueryX = %f, %f, %d\n", idle_time, sys_idle_avg, sys_idle_time);
+		error_log("QueryX = %f, %f, %d\n", idle_time, sys_idle_avg, sys_idle_time);
 }
 
 //Update login status
@@ -74,7 +86,7 @@ void query_login(){
 	if (INVERT_LOGIN)
 		sys_login = !sys_login;
 	if (VERBOSE)
-		printf("QueryLogin = %d\n", sys_login);
+		error_log("QueryLogin = %d\n", sys_login);
 }
 
 //Update processor load
@@ -84,7 +96,7 @@ void query_load(){
 	sys_load = sys_info.loads[0]/65536.0f;
 	//Debug load query
 	if (VERBOSE)
-		printf("QueryLoad = %f\n", sys_load);
+		error_log("QueryLoad = %f\n", sys_load);
 }
 
 //Update system time
@@ -101,7 +113,7 @@ void query_time(){
 		sys_valid_time = 0;
 		QTimeTime = (5-time_info->tm_wday)*86400 + (24-ftime)*3600 + 10;
 		if (VERBOSE)
-			printf("QueryTime = Daemon disabled until weekend (%d seconds)\n", QTimeTime);
+			error_log("QueryTime = Daemon disabled until weekend (%d seconds)\n", QTimeTime);
 		goto DISABLE_RESET;
 	}
 	//If we don't enable time restrictions, don't do any calculations
@@ -110,7 +122,7 @@ void query_time(){
 		if (!OnlyWeekends)
 			QTimeTime = 1;
 		if (VERBOSE)
-			printf("QueryTime = Time zone restriction disabled\n");
+			error_log("QueryTime = Time zone restriction disabled\n");
 		return;
 	}
 	//No time restrictions on weekends
@@ -120,7 +132,7 @@ void query_time(){
 		if (time_info->tm_wday == 6)
 			QTimeTime += 86400;
 		if (VERBOSE)
-			printf("QueryTime = Time zone restriction disabled for weekend (%d seconds)\n", QTimeTime);
+			error_log("QueryTime = Time zone restriction disabled for weekend (%d seconds)\n", QTimeTime);
 		return;
 	}
 	//Time bounds do not wrap; from 0+ to 24-
@@ -138,7 +150,7 @@ void query_time(){
 	QTimeTime = new_delay*3600 + 10;
 	//Debug query time
 	if (VERBOSE)
-		printf("QueryTime = %d, %d\n", sys_valid_time, QTimeTime);
+		error_log("QueryTime = %d, %d\n", sys_valid_time, QTimeTime);
 	if (sys_valid_time) return;
 
 	DISABLE_RESET:
@@ -284,5 +296,5 @@ void query_config(){
 
 	//Debug config
 	if (VERBOSE)
-		printf("QueryConfig = %f\n", sys_idle_avg_decay);
+		error_log("QueryConfig = %f\n", sys_idle_avg_decay);
 }
