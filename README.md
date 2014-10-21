@@ -20,7 +20,6 @@ This is a daemon for linux. It toggles the NIMBY option of Tractor blades for yo
 - Setup daemon to run on startup. Since it uses X11 for some configuration options, I recommend having it run as a startup script from your dispay manager. For example, with GDM, add the following to `/etc/gdm/Init/Default`
 
     ```
-    pkill -9 -f BLADE_DIR/NIMBYDaemon
     BLADE_DIR/NIMBYDaemon &
     ```
-    Currently, the daemon doesn't behave correctly when multiple instances are running (e.g. with multiple X displays). So for now, we just kill any existing NIMBYDaemon processes before starting the new one.
+    The daemon automatically exits when it can no longer connect to X. Currently, the daemon won't behave very well when there are multiple displays/daemons running.

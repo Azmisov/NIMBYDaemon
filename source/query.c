@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/sysinfo.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include "comms.h"
@@ -40,14 +41,10 @@ void query_reset_login(){
 void query_x(int dt){
 	//Open XDisplay and query for idleness
 	int err_num = 0;
-	while (1){
-		if (!(display = XOpenDisplay(NULL))){
-			if (++err_num % 10 == 0)
-				error_log("XServer has not been running for %d minutes\n", err_num/10);
-			sleep(6);
-		}
-		else break;
-	}
+	if (!(display = XOpenDisplay(NULL))){
+		error_log("X server shutdown; stopping daemon");
+		exit(7);
+	}			
 	XScreenSaverInfo info;
 	XScreenSaverQueryInfo(display, DefaultRootWindow(display), &info);
 	float idle_time = (float) info.idle/1000.0f;
