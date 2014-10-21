@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
 		//Try getting system IP address every 6 sec
 		if (get_ipaddress(ip_address)){
 			if (++err_num % 10 == 0){
-				error_log("Failed to get system IP address for 1 minute\n", err_num/10);
+				error_log("Failed to get system IP address for 1 minute\n");
 				return 5;
 			}
 			sleep(6);
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]){
 	while (1){
 		if (!(display = XOpenDisplay(NULL))){
 			if (++err_num % 10 == 0){
-				error_log("XServer has not been running for 1 minute\n", err_num/10);
+				error_log("XServer has not been running for 1 minute\n");
 				return 6;
 			}
 			sleep(6);
