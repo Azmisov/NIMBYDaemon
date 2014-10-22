@@ -7,7 +7,7 @@ This is a daemon for linux. It toggles the NIMBY option of Tractor blades for yo
 - Make sure Tractor Blade is installed on the computer
 - Copy the NIMBYDaemon.config file to the **website** directory where your Tractor Engine is installed. The daemon updates its configuration by fetching `http://tractor-engine/NIMBYDaemon.config` periodically.
     ```
-    cp source/NIMBYDaemon.config ENGINE_DIR/website/
+    cp NIMBYDaemon.config ENGINE_DIR/website/
     ```
   The config file gives a good description for each of the configuration options. *Warning: do not remove options from the config file, or you'll start getting errors in the log file.*
 
@@ -26,7 +26,7 @@ This is a daemon for linux. It toggles the NIMBY option of Tractor blades for yo
 
 ##Customization
 
-Most of the customization for the daemon can be done by editing the `NIMBYDaemon.config` file. A couple things are hardcoded, which you might want to change. Here are some files you might want to edit:
+Most of the customization for the daemon can be done by editing the `NIMBYDaemon.config` file. A couple things are hardcoded, so here are some files you might want to edit:
 - *config.h*: a couple define headers for extra logging and debugging
 - *config.c*: configuration defaults, if the daemon cannot fetch the `NIMBYDaemon.config` file
 - *query.c*: more configuration defaults; also holds the URL of the configuration file (inside `query_config` method)
