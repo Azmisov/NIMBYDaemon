@@ -1,0 +1,163 @@
+<style scoped>
+	input[type="number"] {
+		margin:2px 3px 2px 0;
+		width:60px;
+	}
+	h3{
+		margin-bottom:0;
+	}
+	section{
+		padding-left:15px;
+	}
+	section>div{
+		margin:6px 0;
+		font-style:italic;
+		max-width:750px;
+		font-size:12px;
+	}
+	form{
+		margin-bottom:15px;
+	}
+</style>
+
+<script>
+var nm_bool = ["EnableDaemon","OnlyWeekends","EnableTimeZone","OnlyWeekdays","EnableLoginIdle","EnableLogoutIdle"];
+var nm_num = ["TimeStart","TimeEnd","IdleLoginTime","BusyTime","IdleProcessorLoad","IdleLogoutTime","QFreqX","QFreqLogin","QFreqLoad","QFreqConfig"];
+var nm_str = ["LogFile"];
+function NIMBY_map(to_json){
+	var nm = document.getElementById("NIMBY_form");
+	var nc = window.NIMBY_configuration;
+	for (var i=0; i<nm_bool.length; i++){
+		var x = nm_bool[i];
+		if (to_json) nc[x] = nm[x].checked;
+		else nm[x].checked = nc[x];
+	}
+	for (var i=0; i<nm_num.length; i++){
+		var x = nm_num[i];
+		if (to_json) nc[x] = parseFloat(nm[x].value);
+		else nm[x].value = nc[x];
+	}
+	for (var i=0; i<nm_str.length; i++){
+		var x = nm_str[i];
+		if (to_json) nc[x] = nm[x].value;
+		else nm[x].value = nc[x];
+	}
+}
+NIMBY_map(false);
+
+function NIMBY_save(){
+	NIMBY_map(true);
+	//Send http request to the NIMBYWriter nodejs server
+	$.ajax({
+		url:"http://tractor-engine:9615/",
+		type:"POST",
+		"crossDomain":true,
+		data: JSON.stringify(window.NIMBY_configuration),
+		error:function(xhr, status, err){
+			console.error(err);
+		}
+	});
+	return false;
+}
+</script>
+
+<button id="nimby_save" onclick="NIMBY_save()">Save Settings</button> <span id="nimby_admin"></span>
+
+<form id="NIMBY_form">
+
+<h3>Daemon Enabled</h3>
+<section>
+	<div>
+		This option allows the NIMBY setting of computers to be toggled on or off. If you disable the daemon, it will revert to the default blade NIMBY configuration. If the daemon is disabled, no other settings will have any effect.
+	</div>
+	<label>
+		<input type="checkbox" name="EnableDaemon"> Enable NIMBY Daemon
+	</label><br>
+	<label>
+		<input type="checkbox" name="OnlyWeekends"> Only enable on weekends (Saturday and Sunday)
+	</label>
+</section>
+
+<h3>Time Restriction</h3>
+<section>
+	<div>
+		These options allow NIMBY to be disabled only during a certain time zone. These times should be specified in hours, using military time. Use decimals for specifying times less than an hour. For example, 8:30pm would be 20.5
+	</div>
+	<label>
+		<input type="checkbox" name="EnableTimeZone"> Enable time zone restriction
+	</label><br>
+	<label>
+		<input type="checkbox" name="OnlyWeekdays"> Only enable time restriction on weekdays (Monday through Friday)
+	</label><br>
+	<label>
+		<input type="number" min="0" max="24" step="any" name="TimeStart">
+		Restriction start
+	</label><br>
+	<label>
+		<input type="number" min="0" max="24" step="any" name="TimeEnd">
+		Restriction end
+	</label>
+</section>
+
+<h3>Idle Detection</h3>
+<section>
+	<div>
+		By default, the daemon will only add a computer to the farm when nobody is logged in. However, sometimes, a user will leave their computer running for a long time without using it. We can use this down time to render jobs on the computer. You also may want to disable farm access when nobody is logged in, but you think someone might use the machine soon.
+	</div>
+	<label>
+		<input type="checkbox" name="EnableLoginIdle"> Disable NIMBY if a user is idle
+	</label><br>
+	<label>
+		<input type="checkbox" name="EnableLogoutIdle"> Enable NIMBY if computer is active, but nobody is logged in
+	</label><br>
+	<label>
+		<input type="number" min="0" stpe="1" name="BusyTime">
+		Seconds of interaction with the computer to be considered "active"
+	</label><br>
+	<label>
+		<input type="number" min="0" step="any" name="IdleProcessorLoad">
+		Maximum processor load for a computer to be considered "inactive"
+	</label><br>
+	Seconds computer is inactive before disabling NIMBY...<br>
+	<label>
+		<input type="number" min="1" step="1" name="IdleLoginTime">
+		when user is logged in
+	</label><br>
+	<label>
+		<input type="number" min="1" step="1" name="IdleLogoutTime">
+		when nobody is logged in
+	</label>
+</section>
+
+<h3>Query Frequency</h3>
+<section>
+	<div>
+		These settings control how often the daemon will query the system state. These values are all in seconds; they determine the maximum delay in detecting a change in the system.
+	</div>
+	<label>
+		<input type="number" min="1" step="1" name="QFreqX">
+		X server idle time
+	</label><br>
+	<label>
+		<input type="number" min="1" step="1" name="QFreqLogin">
+		User login
+	</label><br>
+	<label>
+		<input type="number" min="1" step="1" name="QFreqLoad">
+		Processor load
+	</label><br>
+	<label>
+		<input type="number" min="1" step="1" name="QFreqConfig">
+		Configuration file reload
+	</label>
+</section>
+
+<h3>Log File</h3>
+<section>
+	<div>
+		A log file is used to track all errors on a blade. This specifies the log file location.
+	</div>
+	<input type="text" style="width:250px;" name="LogFile">
+</section>
+
+</form>

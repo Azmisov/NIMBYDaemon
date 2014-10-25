@@ -42,7 +42,7 @@ void query_x(int dt){
 	//Open XDisplay and query for idleness
 	int err_num = 0;
 	if (!(display = XOpenDisplay(NULL))){
-		error_log("X server shutdown; stopping daemon");
+		error_log("X server shutdown; stopping daemon\n");
 		exit(7);
 	}			
 	XScreenSaverInfo info;
